@@ -1,0 +1,22 @@
+{
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "nodejs-php-fallback/nodejs-php-fallback": false
+        },
+        "platform": { 
+          "php": "7.4.33" 
+        } 
+     },
+    "autoload": {
+        "classmap": [
+            "controllers"
+        ]
+    },
+    "require": {
+        "pug-php/pug": "3.*",        
+        "bcosca/fatfree-core": "3.7.*"
+    }
+}

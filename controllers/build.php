@@ -211,8 +211,9 @@ JS;
                             }
                         }
                     }
+                    $index = $asset ? $index : null;
                     is_dir("assets/$ext") || mkdir("assets/$ext",0755,true); 
-                    if(AUTO_MODELS && $this->f3->APP && $ext=='js'){
+                    if($index && $this->f3->APP && $ext=='js'){
                         $swork = <<<JS
 var staticCacheName = "pwa"; 
 self.addEventListener("install", function (e) {
@@ -231,9 +232,10 @@ self.addEventListener("fetch", function (event) {
 });
 JS;
                         $asset[] = \__fn::minify('js',$swork);
+                    }
+                    if(AUTO_MODELS)
                         file_put_contents("assets/$ext/$index",implode("\n",$asset));
                         // file_put_contents("assets/js/$index",implode("\n",$asset)."\n",FILE_APPEND);
-                    }
                     $index = "assets/$ext/$index?__=".time();
                 }
                 return $index;

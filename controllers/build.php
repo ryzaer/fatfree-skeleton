@@ -98,11 +98,11 @@ HTML;
                 unset($this->f3->db);                
             });
             $this->f3->set('db',function(...$vals){
-                $host = isset($vals[0]) ? $vals[0] : ( $this->f3->SQL['host'] ? $this->f3->SQL['host'] : null);
+                $host = isset($vals[0]) ? "mysql:host=".$vals[0] : ( $this->f3->SQL['host'] ? "mysql:host=".$this->f3->SQL['host'] : null);
                 $user = isset($vals[1]) ? $vals[1] : ( $this->f3->SQL['user'] ? $this->f3->SQL['user'] : null);
                 $pass = isset($vals[2]) ? $vals[2] : ( $this->f3->SQL['pass'] ? $this->f3->SQL['pass'] : null);
-                $name = isset($vals[3]) ? $vals[3] : ( $this->f3->SQL['name'] ? $this->f3->SQL['name'] : null);
-                return new \DB\SQL($host,$user,$pass,$name);
+                $name = isset($vals[3]) ? ";dbname=".$vals[3] : ( $this->f3->SQL['name'] ? ";dbname=".$this->f3->SQL['name'] : null);
+                return new \DB\SQL($host.$name,$user,$pass);
             }); 
             
             $this->f3->set('fn',\__fn::get("{$this->f3->ROOT}/{$this->f3->BASE}/app/__functions",true)); 

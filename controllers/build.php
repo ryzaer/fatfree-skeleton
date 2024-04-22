@@ -25,7 +25,6 @@ class build {
             is_dir(VIEW_MODELS) || mkdir(VIEW_MODELS,0755,true);
 
             $this->f3->set('assign',function(...$args){
-                $count = 0;
                 /**
                  * connecting databases
                  */

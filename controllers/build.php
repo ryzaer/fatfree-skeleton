@@ -29,19 +29,8 @@ class build {
                 /**
                  * connecting databases
                  */
-                if(!$this->f3->db){
-                    foreach (['host','user','pass','name'] as $prm ) {
-                        if(isset($this->f3->SQL[$prm]) && $this->f3->SQL[$prm])
-                                $count++;
-                    }
-                    $host = $this->f3->SQL['host'] ? $this->f3->SQL['host'] : null;
-                    $user = $this->f3->SQL['user'] ? $this->f3->SQL['user'] : null;
-                    $pass = $this->f3->SQL['pass'] ? $this->f3->SQL['pass'] : null;
-                    $name = $this->f3->SQL['name'] ? $this->f3->SQL['name'] : null;
-
-                    if($count >= 3)
-                        $this->f3->db = new \DB\SQL($host,$user,$pass,$name);
-                }
+                if(!$this->f3->db && count($this->f3->SQL) >= 3)
+                    $this->f3->db = $this->f3->db();                
 
                 $this->f3->db || die('<i style="color:red">Assign function need database connection!<br>check \'SQL\' in [global] settings (ini file extension)</i>');
                 

@@ -1,5 +1,5 @@
 # fatfree-skeleton
-Simple FATFREE Framework Skeleton, easy to auto generate functions &amp; Customable MVC
+Simple FATFREE customizable MVC, functionally patterned, arrangement and writing custom function automatically also PWA Integration.
 ## Installation
 Just clone or download the scripts then install using composer
 ```html

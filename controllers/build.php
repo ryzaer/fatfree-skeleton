@@ -119,53 +119,44 @@ HTML;
             }); 
             $this->f3->set('view',function($file,$mime=null) {
                 if(AUTO_MODELS && $this->f3->APP){
-                    // generate manifest js
-                    $vers = $this->f3->APP['version'];
-                    $mode = $this->f3->DEV['auto'] ? "Dev" : "Pro";
-                    $manifest["name"] = $this->f3->APP['name'];
-                    $manifest["lang"] = $this->f3->APP['lang'];
-                    $manifest["short_name"] = $this->f3->APP['short_name'];
-                    $manifest["start_url"] = $this->f3->APP['start_url'];
-                    $manifest["display"] = $this->f3->APP['display'];
-                    $manifest["orientation"] = $this->f3->APP['orientation'];
-                    $manifest["background_color"] = $this->f3->APP['background_color'];
-                    $manifest["theme_color"] = $this->f3->APP['theme_color'];
-                    $manifest["description"] = $this->f3->APP['description'];
-                    $manifest["version_name"] = "$vers $mode";
-                    if($this->f3->APP['screenshots']){
-                        $list_screen = [];
-                        $screenshot = explode(";",$this->f3->APP['screenshots']);
-                        foreach ( $screenshot as $key => $val) {
-                            $val = trim($val);
-                            $get_icon = file_exists($val) ? getimagesize($val) : [ 100,100,'mime'=>'image/vnd.microsoft.icon'];
-                               
-                            $factory = "narrow";     
-                            if($get_icon[0] >=1000)
-                                $factory = "wide";
 
-                            $list_screen[]= [
-                                'src' => $val,
-                                'type' => $get_icon['mime'],
-                                'sizes' => "{$get_icon[0]}x{$get_icon[1]}",
-                                "form_factor" => $factory
-                            ]; 
-                        }
-                        if($list_screen)
-                            $manifest["screenshots"] = $list_screen;
+                    $manifest = [];
+                    foreach ($this->f3->APP as $key => $value) {
+                        if($value)
+                            if($key=='screenshots' || $key=='icons'){
+                                $list_img = [];
+                                $favicons = explode(";",$this->f3->APP[$key]);
+                                foreach ( $favicons as $var => $val) {
+                                    $val = trim($val);
+                                    $get_icon = file_exists($val) ? getimagesize($val) : [ 100,100,'mime'=>'image/vnd.microsoft.icon'];
+                                    
+                                    if($key == 'screenshots'){
+                                        $factory = "narrow";     
+                                        if($get_icon[0] >=1000)
+                                            $factory = "wide";
+                                    }
+
+                                    $arrimg = [
+                                        'src' => $val,
+                                        'type' => $get_icon['mime'],
+                                        'sizes' => "{$get_icon[0]}x{$get_icon[1]}"
+                                    ]; 
+
+                                    if($key == 'screenshots')
+                                        $arrimg = array_merge($arrimg,["form_factor" => $factory]);
+
+                                    $list_img[]= $arrimg;
+
+                                }
+                                if($list_img)
+                                    $manifest[$key] = $list_img;
+
+                            }elseif($key == 'version'){
+                                $manifest[$key] = $value.($this->f3->DEV['auto'] ? " Dev" : " Pro");
+                            }else{
+                                $manifest[$key] = $value;
+                            }
                     }
-                    $list_icon = [];
-                    $data_icon = explode(";",$this->f3->APP['icons']);
-                    foreach ( $data_icon as $key => $val) {
-                        $val = trim($val);
-                        $get_icon = file_exists($val) ? getimagesize($val) : [ 100,100,'mime'=>'image/vnd.microsoft.icon'];
-                        $list_icon[]= [
-                            'src' => $val,
-                            'sizes' => "{$get_icon[0]}x{$get_icon[1]}",
-                            'type' => $get_icon['mime']
-                        ];            
-                    }
-                    if($list_icon)
-                        $manifest["icons"] = $list_icon;
                     file_put_contents("manifest.json", json_encode($manifest));                    
                 }
                 if(file_exists($file)){  

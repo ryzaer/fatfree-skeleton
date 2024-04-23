@@ -130,7 +130,6 @@ HTML;
                     $manifest["orientation"] = $this->f3->APP['orientation'];
                     $manifest["background_color"] = $this->f3->APP['background_color'];
                     $manifest["theme_color"] = $this->f3->APP['theme_color'];
-                    $manifest["scope"] = $this->f3->APP['scope'];
                     $manifest["description"] = $this->f3->APP['description'];
                     $manifest["version_name"] = "$vers $mode";
                     if($this->f3->APP['screenshots']){

@@ -6,16 +6,34 @@ class build {
     private $const;
     private function set_consts(){
         if(!$this->const){
-            $this->const = true;
+            $strtotime = strtotime(date('Y-m-d H:i:s'));
             // the constant to auto write custom views function in models folder
+            $this->const = true;
+            $this->pwa_script = <<<JS
+var staticCacheName = "pwa-$strtotime"; 
+self.addEventListener("install", function (e) {
+    e.waitUntil(
+    caches.open(staticCacheName).then(function (cache) {
+        return cache.addAll(["/"]);
+    })
+    )
+}); 
+self.addEventListener("fetch", function (event) {
+    vent.respondWith(
+    caches.match(event.request).then(function (response) {
+        return response || fetch(event.request);
+    })
+    )
+});
+JS;
             $tmp_location = isset($this->f3->TEMP_MODELS) ?  $this->f3->TEMP_MODELS : false;
             !$tmp_location || $this->f3->set('TEMP', $tmp_location); 
             defined('TEMP_MODELS') || define('TEMP_MODELS',!$tmp_location ? $this->f3->TEMP : $tmp_location); 
-            // auto make view models if not exists
+            // automake view models if not exists
             is_dir(TEMP_MODELS) || mkdir(TEMP_MODELS,0755,true);
 
             // the constant to auto write custom views function in models folder
-            $auto_create = isset($this->f3->DEV['MODEL']) && is_bool($this->f3->DEV['MODEL']) ?  $this->f3->DEV['MODEL'] : true; 
+            $auto_create = is_bool($this->f3->DEV['model']) ?  $this->f3->DEV['model'] : true; 
             defined('AUTO_MODELS') || define('AUTO_MODELS',$auto_create);
 
             // the constant to custom views function folder
@@ -24,12 +42,12 @@ class build {
             // auto make view models if not exists
             is_dir(VIEW_MODELS) || mkdir(VIEW_MODELS,0755,true);
 
-            $this->f3->set('assign',function(...$args){
+            $this->f3->set('assign',function(...$args){                
                 /**
                  * connecting databases
                  */
                 if(!$this->f3->db && count($this->f3->SQL) >= 3)
-                    $this->f3->db = $this->f3->db();                
+                    $this->f3->db = $this->f3->db(); 
 
                 $this->f3->db || die('<i style="color:red">Assign function need database connection!<br>check \'SQL\' in [global] settings (ini file extension)</i>');
                 
@@ -106,15 +124,36 @@ HTML;
                     $mode = $this->f3->DEV['auto'] ? "Dev" : "Pro";
                     $manifest["name"] = $this->f3->APP['name'];
                     $manifest["lang"] = $this->f3->APP['lang'];
-                    $manifest["default_locale"] = $this->f3->APP['default_locale'];
                     $manifest["short_name"] = $this->f3->APP['short_name'];
                     $manifest["start_url"] = $this->f3->APP['start_url'];
                     $manifest["display"] = $this->f3->APP['display'];
+                    $manifest["orientation"] = $this->f3->APP['orientation'];
                     $manifest["background_color"] = $this->f3->APP['background_color'];
                     $manifest["theme_color"] = $this->f3->APP['theme_color'];
                     $manifest["scope"] = $this->f3->APP['scope'];
                     $manifest["description"] = $this->f3->APP['description'];
                     $manifest["version_name"] = "$vers $mode";
+                    if($this->f3->APP['screenshots']){
+                        $list_screen = [];
+                        $screenshot = explode(";",$this->f3->APP['screenshots']);
+                        foreach ( $screenshot as $key => $val) {
+                            $val = trim($val);
+                            $get_icon = file_exists($val) ? getimagesize($val) : [ 100,100,'mime'=>'image/vnd.microsoft.icon'];
+                               
+                            $factory = "narrow";     
+                            if($get_icon[0] >=1000)
+                                $factory = "wide";
+
+                            $list_screen[]= [
+                                'src' => $val,
+                                'type' => $get_icon['mime'],
+                                'sizes' => "{$get_icon[0]}x{$get_icon[1]}",
+                                "form_factor" => $factory
+                            ]; 
+                        }
+                        if($list_screen)
+                            $manifest["screenshots"] = $list_screen;
+                    }
                     $list_icon = [];
                     $data_icon = explode(";",$this->f3->APP['icons']);
                     foreach ( $data_icon as $key => $val) {
@@ -126,9 +165,9 @@ HTML;
                             'type' => $get_icon['mime']
                         ];            
                     }
-                    $manifest["icons"] = $list_icon;
-                    file_put_contents("manifest.json", json_encode($manifest,JSON_PRETTY_PRINT));
-                    
+                    if($list_icon)
+                        $manifest["icons"] = $list_icon;
+                    file_put_contents("manifest.json", json_encode($manifest));                    
                 }
                 if(file_exists($file)){  
                     preg_match('/\.pug/',$file,$match);
@@ -182,53 +221,39 @@ JS;
                     "js" => "scripts",
                     "css" => "styles"
                 ];
+                
                 $index = isset($filename[0]) && is_string($filename[0]) ? $filename[0] : null;
-                if(isset($src[$ext]) && $index){
+                if(AUTO_MODELS && isset($src[$ext]) && $index){
                     is_dir("app/templates/{$src[$ext]}") || mkdir("app/templates/{$src[$ext]}",0755,true);
                     $asset = [] ;
                     foreach ($filename as $sfile) {
                         preg_match("/\.$ext/",$sfile,$mtch);
                         if($mtch){
                             $file = "app/templates/{$src[$ext]}/$sfile";
-                            file_exists($file) || file_put_contents($file,"/* $sfile */");  
-                            if(AUTO_MODELS){
-                                $source = file_get_contents($file);
-                                if($this->f3->DEV['minified']){
-                                    $asset[] = \__fn::minify($ext,$source);
-                                }else{
-                                    $asset[] = $source;
-                                }
+                            file_exists($file) || file_put_contents($file,"/* $sfile */");
+                            $source = file_get_contents($file);
+                            if($this->f3->DEV['minified']){
+                                $asset[] = \__fn::minify($ext,$source);
+                            }else{
+                                $asset[] = $source;
                             }
                         }
                     }
-                    $index = $asset ? $index : null;
+                    
                     is_dir("assets/$ext") || mkdir("assets/$ext",0755,true); 
-                    if($index && $this->f3->APP && $ext=='js'){
-                        $swork = <<<JS
-var staticCacheName = "pwa"; 
-self.addEventListener("install", function (e) {
-  e.waitUntil(
-    caches.open(staticCacheName).then(function (cache) {
-      return cache.addAll(["/"]);
-    })
-  )
-}); 
-self.addEventListener("fetch", function (event) {
-  vent.respondWith(
-    caches.match(event.request).then(function (response) {
-      return response || fetch(event.request);
-    })
-  )
-});
-JS;
-                        $asset[] = \__fn::minify('js',$swork);
+                    if($asset && $this->f3->APP && $ext=='js'){
+                        // add pwa script here
+                        if($this->f3->DEV['minified']){
+                            $asset[] = \__fn::minify($ext,$this->pwa_script);
+                        }else{
+                            $asset[] = $this->pwa_script;
+                        }
                     }
-                    if(AUTO_MODELS)
-                        file_put_contents("assets/$ext/$index",implode("\n",$asset));
-                        // file_put_contents("assets/js/$index",implode("\n",$asset)."\n",FILE_APPEND);
-                    $index = "assets/$ext/$index?__=".time();
+                    $index = $asset ? $index : null;
+                    file_put_contents("assets/$ext/$index",implode($this->f3->DEV['minified'] ? "":"\n",$asset));
+                    // file_put_contents("assets/js/$index",implode("\n",$asset)."\n",FILE_APPEND);
                 }
-                return $index;
+                return file_exists("assets/$ext/$index") ? "assets/$ext/$index?__=".time() : null;
             });
             $this->f3->set('scripts',function(...$filename){
                 return $this->f3->script('js',$filename);
@@ -259,14 +284,22 @@ JS;
                         foreach ($script as $name) {
                             $concat[] = file_get_contents($name);                            
                         }
+                        if($concat && $this->f3->APP){
+                            // add pwa script here
+                            if($this->f3->DEV['minified']){
+                                $concat[] = \__fn::minify($ext,$this->pwa_script);
+                            }else{
+                                $concat[] = $this->pwa_script;
+                            }
+                        }
                         $concat = implode("\n",$concat);
                         if($this->f3->DEV['minified'])
                             $concat = \__fn::minify($concat);
                         file_put_contents($index,"/* {$this->f3->PACKAGE} */\n$concat");
                     }
-                    $asset = "$index?__=".time();
                 }
-                return $asset;
+                
+                return file_exists($index) ? "$index?__=".time() : null;
             });
         }
     }

@@ -176,7 +176,7 @@ HTML;
                             $mode = isset($this->f3->DEV['minified']) && is_bool($this->f3->DEV['minified']) ? $this->f3->DEV['minified'] : true;
                             $dump = $this->f3->text($file,is_string($mime) ? $mime : null);
                             $dump = $mode ? \minify\html::emit($dump) : \beautify\html::emit($dump);
-                            print htmlspecialchars_decode($mode ? preg_replace('/\>\s+\</','><',$dump) : $dump);
+                            print htmlspecialchars_decode($dump);
                         }
                         // DEV Mode active auto reloader if any script updated
                         if($this->f3->DEV['auto']){
@@ -301,8 +301,20 @@ JS;
             self::$ins->config($arg);
         }     
         preg_match('/(Apache|LiteSpeed)/s',$_SERVER['SERVER_SOFTWARE'],$htsupport);
-        $hta = "RewriteEngine On\nRewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule ^ index.php [QSA,L]";
-        if($htsupport) file_exists('.htaccess') || file_put_contents('.htaccess',$hta);
+        if($htsupport) {
+            file_exists('.htaccess') || file_put_contents('.htaccess',implode("\n",[
+                "<IfModule mod_rewrite.c>",
+                "    Options +FollowSymLinks -MultiViews",
+                "    RewriteEngine On",
+                "    RewriteCond %{REQUEST_FILENAME} !-f",
+                "    RewriteRule ^ index.php [QSA,L]", 
+                "    <FilesMatch \"\.(ini|env|cfg|conf)$\">",
+                "        Order allow,deny",
+                "        Deny from all",
+                "    </FilesMatch>",
+                "</IfModule>",
+            ]));
+        }
        return self::$ins;
     }
 

@@ -174,8 +174,9 @@ HTML;
                         if($match){
                             // defaul template ngine
                             $mode = isset($this->f3->DEV['minified']) && is_bool($this->f3->DEV['minified']) ? $this->f3->DEV['minified'] : true;
-                            $dump = htmlspecialchars_decode($this->f3->text($file,is_string($mime) ? $mime : null));
-                            print $mode ? \minify\html::emit($dump) : \beautify\html::emit($dump);
+                            $dump = $this->f3->text($file,is_string($mime) ? $mime : null);
+                            $dump = $mode ? \minify\html::emit($dump) : \beautify\html::emit($dump);
+                            print htmlspecialchars_decode($dump);
                         }
                         // DEV Mode active auto reloader if any script updated
                         if($this->f3->DEV['auto']){
@@ -370,7 +371,6 @@ JS;
                     $this->f3->set("CORS.$cors",$allow[$cors]);
             }
             
-            
             // custom callback for view models
             if(is_string($call)){
                 preg_match('/models::.*->.*/s',$call,$matchs);    
@@ -443,8 +443,6 @@ JS;
 
         return $this;
     }
-     
-
     function reroute(...$args){
         $this->f3->reroute(...$args);
     }

@@ -192,7 +192,7 @@ setInterval(async () => {
     });
     response.text().then(function(text){
         var body = document.querySelector('body'),
-            text = text.length > 17 ? 'error-script' : text;
+            text = text.length == 32 ? text : 'error-script';
         if(!body.dataset.stat)
             body.setAttribute('data-stat',text);
         if(body.dataset.stat != text)
@@ -410,7 +410,7 @@ JS;
                     if($time < $stat['mtime'])
                         $time = $stat['mtime'];
                     header('Content-Type: text/plain');
-                    print "$time-$size";
+                    print md5("$time-$size");
                 };
             
             $this->f3->route($router,$call,$ttl,$kbps);

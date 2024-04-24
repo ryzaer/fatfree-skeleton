@@ -3,7 +3,7 @@
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [QSA,L]  
-    <FilesMatch "\.(ini|log|sh|exe)$">
+    <FilesMatch "\.(ini|env|cfg|conf)$">
         Order allow,deny
         Deny from all
     </FilesMatch>

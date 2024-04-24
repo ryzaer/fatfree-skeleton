@@ -10,7 +10,7 @@ access www folder via browser
 ```text
 http://localhost/fatfree-skeleton/www 
 ```
-no need configuration to the web services that can read .htaccess file, but if you run in nginx add configuration below
+no configuration required to a web service that can read .htaccess files, but if you run in nginx add configuration below
 ```conf
 server {
     server_name _; 

@@ -10,7 +10,7 @@ access www folder via browser
 ```text
 http://localhost/fatfree-skeleton/www 
 ```
-we have .htaccess file configure but if you run in nginx web service you can custom example config below
+we have .htaccess file configuration, but if you run in nginx web service add configuration below
 ```conf
 server {
     server_name _; 

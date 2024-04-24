@@ -176,7 +176,7 @@ HTML;
                             $mode = isset($this->f3->DEV['minified']) && is_bool($this->f3->DEV['minified']) ? $this->f3->DEV['minified'] : true;
                             $dump = $this->f3->text($file,is_string($mime) ? $mime : null);
                             $dump = $mode ? \minify\html::emit($dump) : \beautify\html::emit($dump);
-                            print htmlspecialchars_decode($dump);
+                            print htmlspecialchars_decode($mode ? preg_replace('/\>\s+\</','><',$dump) : $dump);
                         }
                         // DEV Mode active auto reloader if any script updated
                         if($this->f3->DEV['auto']){
@@ -370,6 +370,7 @@ JS;
                 if(isset($allow[$cors]) && $allow[$cors])
                     $this->f3->set("CORS.$cors",$allow[$cors]);
             }
+            
             
             // custom callback for view models
             if(is_string($call)){

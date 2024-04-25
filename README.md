@@ -16,20 +16,20 @@ server {
     server_name _; 
     root /fatfree-skeleton/www/;    
     location / {
-        index index.html index.htm index.php;        
-        location ~ \.php$ {
-            fastcgi_intercept_errors on;
-            fastcgi_buffer_size 16k;
-            fastcgi_buffers 4 16k;
-            fastcgi_connect_timeout 600;
-            fastcgi_send_timeout 600;
-            fastcgi_read_timeout 600;
-            fastcgi_pass php-fpm;
-            fastcgi_index index.php;
-            include fastcgi_params;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        }
+        index index.html index.htm index.php;      
         try_files $uri /index.php?$query_string;
+    }
+    location ~ \.php$ {
+        fastcgi_intercept_errors on;
+        fastcgi_buffer_size 16k;
+        fastcgi_buffers 4 16k;
+        fastcgi_connect_timeout 600;
+        fastcgi_send_timeout 600;
+        fastcgi_read_timeout 600;
+        fastcgi_pass php-fpm;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
     location ~ \.(ini|log|sh|exe)$ {
         deny all;

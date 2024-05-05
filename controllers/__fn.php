@@ -5,14 +5,16 @@ class __fn
     private static $ths;
     private $create = false,
             $folder = __DIR__."/__functions",
+            $fn_scema,
             $souce  = [];
             
     function __construct(){
         $this->source[$this->folder] = $this->create;
     }
 
-    static function get($dirs=null,$call=true){
+    static function get($dirs=null,$call=true,$fnscema = null){
         self::$ths = new \__fn();       
+        self::$ths->fn_scema = $fnscema;
         if(is_string($dirs)){
             is_dir($dirs) || mkdir($dirs,0755,true);
             self::$ths->source[$dirs] = $call; 
@@ -51,6 +53,11 @@ class __fn
         }
     }   
     function preStructureFunc($name){
-        return "<?php function $name(...\$args){\n\tprint \"<b><i style=\\\"color:red\\\"> function $name not build yet!</i></b><br>\";\n}";
+        // you can change this template function on $this->fn_scema
+        $fnscema = "<?php function %s(...\$args){\n\tprint \"<b><i style=\\\"color:red\\\"> function %s not build yet!</i></b><br>\";\n}";
+        if($this->fn_scema){
+            $fnscema = $this->fn_scema;
+        }
+        return sprintf($fnscema,$name,$name);
     }    	
 }

@@ -13,7 +13,8 @@ http://localhost/fatfree-skeleton/www
 no configuration required to a web service that can read .htaccess files, but if you run in nginx add configuration below
 ```conf
 server {
-    server_name _; 
+    listen       80;
+    server_name  example.com www.example.com;
     root /fatfree-skeleton/www/;    
     location / {
         index index.html index.htm index.php;      
@@ -28,10 +29,11 @@ server {
         fastcgi_read_timeout 600;
         fastcgi_pass php-fpm;
         fastcgi_index index.php;
-        include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
     }
-    location ~ \.(ini|log|sh|exe)$ {
+    location ~ \.(hta|ini|env)$ {
+        # deny all traffic to config files
         deny all;
     }
 }

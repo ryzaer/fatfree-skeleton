@@ -320,7 +320,7 @@ JS;
     }
     static function instance($arg=null){
         if(self::$ins){
-            return self::$ins;
+            return self::$ins->f3;
         }else{
             die("<h1>You not have base already, use build::base(string config) before use this instance</h1>");
         }

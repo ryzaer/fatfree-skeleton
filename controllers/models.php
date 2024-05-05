@@ -114,9 +114,9 @@ class models
     private function fn_schema($name){
         $title = strtoupper($name);
         if(AUTO_CACHES){
-            return "<?php function(...\$args){//===== $title FUNCTION START HERE ==========>\n\t\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";\n\t\n}?>";
+            return "<?php function(\$f3,\$prm,\$mdl){//===== $title FUNCTION START HERE ==========>\n\t\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";\n\t\n}?>";
         }else{
-            return "<?php \$this->$name = function(...\$args){//===== FUNCTION START HERE ==========>\n\t\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";\n\t\n}?>";
+            return "<?php \$this->$name = function(\$f3,\$prm,\$mdl){//===== FUNCTION START HERE ==========>\n\t\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";\n\t\n}?>";
         }
     }
     	

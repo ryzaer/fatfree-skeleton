@@ -317,7 +317,13 @@ JS;
         }
        return self::$ins;
     }
-
+    static function instance($arg=null){
+        if(self::$ins){
+            return self::$ins;
+        }else{
+            die("<h1>You not have base already, use build::base(string config) before use this instance</h1>");
+        }
+    }
     function route(...$route){
         $this->set_consts();
         $this->f3 = $this->f3;

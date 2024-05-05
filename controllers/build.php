@@ -113,7 +113,8 @@ HTML;
                 return new \DB\SQL("$engn:$host$port$name",$user,$pass);
             }); 
             
-            $this->f3->set('fn',\__fn::get("{$this->f3->ROOT}/{$this->f3->BASE}/app/__functions",true)); 
+            $fnscema = "<?php function %s(...\$args){\n\t\$f3 = \\build::instance();\n\tprint \"<b><i style=\\\"color:red\\\"> function %s not build yet!</i></b><br>\";\n}";
+            $this->f3->set('fn',\__fn::get("{$this->f3->ROOT}/{$this->f3->BASE}/app/__functions",true,$fnscema));  
             $this->f3->set('text',function($file,$mime=null){
                 return \Template::instance()->render($file,$mime);
             }); 

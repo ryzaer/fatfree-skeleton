@@ -16,6 +16,7 @@ server {
     listen       80;
     server_name  example.com www.example.com;
     root /fatfree-skeleton/www/;    
+    # exp for window  root D:/fatfree-skeleton/www/
     location / {
         index index.html index.htm index.php;      
         try_files $uri /index.php?$query_string;
@@ -29,8 +30,8 @@ server {
         fastcgi_read_timeout 600;
         fastcgi_pass php-fpm;
         fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
     location ~ \.(hta|ini|env)$ {
         # deny all traffic to config files

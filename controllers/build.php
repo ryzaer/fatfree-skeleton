@@ -113,7 +113,7 @@ HTML;
                 return new \DB\SQL("$engn:$host$port$name",$user,$pass);
             }); 
             
-            $fnscema = "<?php function %s(...\$args){\n\t\$f3 = \\build::instance();\n\tprint \"<b><i style=\\\"color:red\\\"> function %s not build yet!</i></b><br>\";\n}";
+            $fnscema = "<?php function %s(...\$args){\n\t//==== FATFREE INSTANCE OBJ [remove if not used] ====>\n\tif(\$f3=\\build::instance()){\n\t\t// write your code here\n\t\t// ..........\n\t\tprint \"<b><i style=\\\"color:purple\\\"> function %s created!</i></b><br>\";\n\t}\n}";
             $this->f3->set('fn',\__fn::get("{$this->f3->ROOT}/{$this->f3->BASE}/app/__functions",true,$fnscema));  
             $this->f3->set('text',function($file,$mime=null){
                 return \Template::instance()->render($file,$mime);

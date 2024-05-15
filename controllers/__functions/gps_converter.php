@@ -20,7 +20,7 @@ function gps_converter($str,$arr=false){
         'longitude' => $scheme[1]
     ] : implode($imp,$scheme);
 }
-if(!file_exists('gps_dec_parser')){
+if(!function_exists('gps_dec_parser')){
     function gps_dec_parser($degN,$var){
         if($degN == 'lat' )
             $degArrs = ['S','N'];
@@ -39,7 +39,7 @@ if(!file_exists('gps_dec_parser')){
         return  "{$var[0]}°$dig1'$dig2\"$deg";
     }
 }
-if(!file_exists('gps_dms_parser')){
+if(!function_exists('gps_dms_parser')){
     function gps_dms_parser($var){
         $var = preg_split('/[\'"°]/', $var);
         $int = (abs($var[2])/60)+(floatval($var[3])/3600);

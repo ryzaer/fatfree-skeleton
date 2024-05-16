@@ -218,16 +218,21 @@ JS;
                 if(AUTO_MODELS && isset($src[$ext]) && $index){
                     is_dir("app/templates/{$src[$ext]}") || mkdir("app/templates/{$src[$ext]}",0755,true);
                     $asset = [] ;
-                    foreach ($filename as $sfile) {
+                    foreach ($filename as $var => $sfile) {
                         preg_match("/\.$ext/",$sfile,$mtch);
                         if($mtch){
                             $file = "app/templates/{$src[$ext]}/$sfile";
-                            file_exists($file) || file_put_contents($file,"/* $sfile */");
-                            $source = file_get_contents($file);
-                            if($this->f3->DEV['minified']){
-                                $asset[] = \__fn::minify($ext,$source);
-                            }else{
-                                $asset[] = $source;
+                            // if after 2nd files not exists generate & include                              
+                            if($var>0)  
+                                file_exists($file) || file_put_contents($file,"/* $sfile */");
+                            
+                            if(file_exists($file)){
+                                $source = file_get_contents($file);
+                                if($this->f3->DEV['minified']){
+                                    $asset[] = \__fn::minify($ext,$source);
+                                }else{
+                                    $asset[] = $source;
+                                }
                             }
                         }
                     }

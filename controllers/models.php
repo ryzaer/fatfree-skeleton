@@ -113,10 +113,76 @@ class models
     }    
     private function fn_schema($name){
         $title = strtoupper($name);
+        // add if models is for error page
+        $errms = "//\$f3 = \$args[0];\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";";
+
+        if($title == "ERROR"){
+            $htmlt = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{@ERROR.code}} ~ {{@ERROR.status}}</title>
+    <style>
+      body { 
+        font-family: sans-serif; 
+        font-size: 1rem;
+        margin: 0;
+        padding: 3rem;
+        line-height: normal;
+      }
+      section { color: green; }
+      h1 { line-height: .5rem; }
+      h1,code { color: red; }
+      h3 { color: orange; }
+      pre {
+        font-family: monospace;
+        margin-top: -1.5rem;
+        line-height: .5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Error {{@ERROR.code}} : {{@ERROR.status}}</h1>
+    <h3># {{@ERROR.text}}</h3> 
+    <pre>
+      <code>
+<loop from="{{ @i=0 }}" to="{{ @i < @error_count }}" step="{{ @i++ }}">
+{{((@error_count-1) == @i ?  '└──' : '├──').@error_trace[@i]}}<br/>
+</loop>
+      </code>
+    </pre>
+    <section>
+      <p>You are trying to access <b>{{@PATH}}</b> that is not associate with our web, follow the instructions below;</p>
+      <ul>
+        <repeat group="{{ @recommended }}" key="{{ @ikey }}" value="{{ @ival }}">
+          <li>{{ @ival }}</li>
+        </repeat>
+      </ul>
+    </section>
+  </body>
+</html>
+HTML;
+            $errms = join("\n\t",[
+                "\$f3 = \$args[0];",
+                "\$f3->set(\"recommended\",[",
+                "    \"It used to appear message from your browser that you are not able to access this web\",",
+                "    \"Try using a different browser and access the same content\",",
+                "    \"This is only example error messages that you can build something else\",",
+                "]);",
+                "\$f3->error_trace = array_values(array_filter(preg_split('/\n/',\$f3->get(\"ERROR.trace\"))));",
+	            "\$f3->error_count = count(\$f3->error_trace);",
+                "http_response_code(\$f3->get(\"ERROR.code\"));",
+                "\$f3->view('app/templates/error.htm');"
+            ]);
+            file_exists('app/templates/error.htm') || file_put_contents('app/templates/error.htm',$htmlt);
+        }
+        
         if(AUTO_CACHES){
-            return "<?php function(\$f3,\$res,\$hdl){//===== $title FUNCTION START HERE ==========>\n\t\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";\n\t\n}?>";
+            return "<?php function(...\$args){//===== $title FUNCTION START HERE ==========>\n\t\n\t$errms\n\t\n}?>";
         }else{
-            return "<?php \$this->$name = function(\$f3,\$res,\$hdl){//===== FUNCTION START HERE ==========>\n\t\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";\n\t\n}?>";
+            return "<?php \$this->$name = function(...\$args){//=====  $title FUNCTION START HERE ==========>\n\t\n\t$errms\n\t\n}?>";
         }
     }
     	

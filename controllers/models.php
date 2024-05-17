@@ -168,7 +168,6 @@ HTML;
                 "\$f3 = \$args[0];",
                 "\$f3->set(\"recommended\",[",
                 "    \"It used to appear message from your browser that you are not able to access this web\",",
-                "    \"Try using a different browser and access the same content\",",
                 "    \"This is only example error messages that you can build something else\",",
                 "]);",
                 "\$f3->error_trace = array_values(array_filter(preg_split('/\n/',\$f3->get(\"ERROR.trace\"))));",

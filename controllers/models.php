@@ -114,8 +114,8 @@ class models
     private function fn_schema($name){
         $title = strtoupper($name);
         // add if models is for error page
-        $errms = "\$f3 = \$args[0];\n\tprint \"<b><i style=\\\"color:orange\\\">Route to \$f3->PATH path is open!</i></b><br>\";";
-
+        $respn = "\$f3,\$resp,\$hndl";
+        $errms = "print \"<b><i style=\\\"color:orange\\\">Route to \$f3->PATH path is open!</i></b><br>\";";
         if($title == "ERROR"){
             $htmlt = <<<HTML
 <!DOCTYPE html>
@@ -164,8 +164,8 @@ class models
   </body>
 </html>
 HTML;
+            $respn = "\$f3";
             $errms = join("\n\t",[
-                "\$f3 = \$args[0];",
                 "\$f3->set(\"recommended\",[",
                 "    \"It used to appear message from your browser that you are not able to access this web\",",
                 "    \"This is only example error messages that you can build something else\",",
@@ -179,9 +179,9 @@ HTML;
         }
         
         if(AUTO_CACHES){
-            return "<?php function(...\$args){//===== $title FUNCTION START HERE ==========>\n\t\n\t$errms\n\t\n}?>";
+            return "<?php function($respn){//===== $title FUNCTION START HERE ==========>\n\t\n\t$errms\n\t\n}?>";
         }else{
-            return "<?php \$this->$name = function(...\$args){//=====  $title FUNCTION START HERE ==========>\n\t\n\t$errms\n\t\n}?>";
+            return "<?php \$this->$name = function($respn){//=====  $title FUNCTION START HERE ==========>\n\t\n\t$errms\n\t\n}?>";
         }
     }
     	

@@ -114,7 +114,7 @@ class models
     private function fn_schema($name){
         $title = strtoupper($name);
         // add if models is for error page
-        $errms = "//\$f3 = \$args[0];\n\tprint \"<b><i style=\\\"color:orange\\\"> function $name is ready to use!</i></b><br>\";";
+        $errms = "\$f3 = \$args[0];\n\tprint \"<b><i style=\\\"color:orange\\\">Route to \$f3->PATH path is open!</i></b><br>\";";
 
         if($title == "ERROR"){
             $htmlt = <<<HTML

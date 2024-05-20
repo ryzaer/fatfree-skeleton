@@ -14,7 +14,7 @@ namespace parse;
 #
 class md extends markdown {
     static function emit($arg){
-        $ths = new markdonwn();
+        $ths = new markdown();
         $str = file_exists($arg) ? file_get_contents($arg) : $arg;
         return $ths->text($arg); 
     }

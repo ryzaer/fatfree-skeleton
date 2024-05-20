@@ -444,7 +444,7 @@ JS;
     }
     function config($str){
         $str = file_exists($str) ? $this->f3->read($str) : $str;
-        $arg = \ascii\ini_style::emit($str);
+        $arg = \parse\ini::emit($str);
         
         foreach ($arg as $cst => $var) {
             $globals = null;

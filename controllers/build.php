@@ -330,10 +330,14 @@ JS;
             die("<h1>You not have base already, use build::base(string config) before use this instance</h1>");
         }
     }
+    private function filter_routes($path){
+        $path = array_values(array_filter(preg_split('/\//s',$path)));
+        return $path ? $path : [''];
+    }
     function route(...$route){
         $this->set_consts();
         $this->f3 = $this->f3;
-        $path = array_values(array_filter(preg_split('/\//s',$this->f3->PATH)));
+        $path = $this->filter_routes($this->f3->PATH);
         $main = null; // main route of url
         $nick = null; // alias
         $mcli = []; // mofified cli
@@ -363,7 +367,7 @@ JS;
         
         $router =  "$mtds$nick /$main$ncli";
         
-        $main = preg_split('/\//is',$main);  
+        $main = $this->filter_routes($main);
         $call = isset($route[1]) && $route[1] ? $route[1] : function(){print "$main page container not set!";}; 
         $ttl  =  0;
         $kbps =  0;
@@ -417,7 +421,7 @@ JS;
                 }
             }
             // DEV Mode active auto reloader if any script updated
-            if($this->f3->DEV['auto'] && $this->f3->POST['__update'] === 'stat')
+            if($this->f3->DEV['auto'] && isset($this->f3->POST['__update']) && $this->f3->POST['__update'] === 'stat')
                 $call = function(){
                     $root = preg_replace('/\\\+|\/+/','/',"{$this->f3->ROOT}/{$this->f3->BASE}");
                     $time = 0;

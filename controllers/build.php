@@ -354,7 +354,7 @@ JS;
                 }
                 if($chkval == '['){
                     preg_match('/\[(ajax|cli)\]/s',$value,$mtchs);
-                    if(!$matchs){
+                    if(!$mtchs){
                         $mcli = explode('|',preg_replace('/(\]|\[)/is','',$value));
                     }else{
                         $ncli = " $value";

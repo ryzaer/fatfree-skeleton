@@ -10,16 +10,13 @@ class build {
             // the constant to auto write custom views function in models folder
             $this->const = true;
             // for spa & pwa content
-            $appSpaMain = isset($this->f3->SPA['main'])  && $this->f3->SPA['main'] ? $this->f3->SPA['main'] : false;
-            $appSpaHead = isset($this->f3->SPA['head'])  && $this->f3->SPA['head'] ? $this->f3->SPA['head'] : 'header';
-            $appSpaFoot = isset($this->f3->SPA['foot'])  && $this->f3->SPA['foot'] ? $this->f3->SPA['foot'] : 'footer';
             $this->spa_script = <<<JS
 class vanilaSPA {
     constructor() {
         /** default page container header, main, footer */
-        this.siteHead = "$appSpaMain",
-        this.siteMain = "$appSpaHead",
-        this.siteFoot = "$appSpaFoot"
+        this.siteHead = "header",
+        this.siteMain = "main",
+        this.siteFoot = "footer"
     }
     route = (event) => {
         event = event || window.event;
@@ -46,11 +43,11 @@ class vanilaSPA {
             }
             */
             /** parsing html template title */
-            htmc = html.split(/(\\n)?<(\/)?title>(\\n)?/ig)[4];
+            htmc = html.split(/<(\/)?title((\s+)?([\w-]+="[^"]*")?)+?>/ig)[5];
             document.title = htmc;
 
             /** parsing html template content */
-            htmc = html.split(/(\\n)?<(\/)?main>(\\n)?/ig)[4];
+            htmc = html.split(/<(\/)?main((\s+)?([\w-]+="[^"]*")?)+?>/ig)[5];
             mainElement.innerHTML = htmc;
 
             
@@ -80,7 +77,7 @@ document.addEventListener('click', function(event) {
     }
 });
 JS;
-            $addSPAScript = $appSpaMain ? "\n$appSpaMain" : null;
+            $addSPAScript = $this->f3->APP['mode_spa'] ? "\n{$this->spa_script}" : null;
             $this->pwa_script = <<<JS
 var staticCacheName = "pwa-$strtotime"; 
 self.addEventListener("install", function (e) {
@@ -195,7 +192,7 @@ HTML;
 
                     $manifest = [];
                     foreach ($this->f3->APP as $key => $value) {
-                        if($value)
+                        if($value && $key !=='mode_spa')
                             if($key=='screenshots' || $key=='icons'){
                                 $list_img = [];
                                 $favicons = explode(";",$this->f3->APP[$key]);

@@ -77,7 +77,7 @@ document.addEventListener('click', function(event) {
     }
 });
 JS;
-            $addSPAScript = $this->f3->APP['mode_spa'] ? "\n{$this->spa_script}" : null;
+            $addSPAScript = isset($this->f3->APP['mode_spa']) && $this->f3->APP['mode_spa'] ? "\n{$this->spa_script}" : null;
             $this->pwa_script = <<<JS
 var staticCacheName = "pwa-$strtotime"; 
 self.addEventListener("install", function (e) {

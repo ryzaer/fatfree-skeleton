@@ -10,14 +10,12 @@ class build {
             // the constant to auto write custom views function in models folder
             $this->const = true;
             // for spa & pwa content
-            $appSpaName = isset($this->f3->APP['name'])  && $this->f3->APP['name'] ? $this->f3->APP['name'] : 'Vanila SPA Router';
-            $appSpaMain = isset($this->f3->SPA['main'])  && $this->f3->SPA['main'] ? $this->f3->SPA['main'] : 'main';
+            $appSpaMain = isset($this->f3->SPA['main'])  && $this->f3->SPA['main'] ? $this->f3->SPA['main'] : false;
             $appSpaHead = isset($this->f3->SPA['head'])  && $this->f3->SPA['head'] ? $this->f3->SPA['head'] : 'header';
             $appSpaFoot = isset($this->f3->SPA['foot'])  && $this->f3->SPA['foot'] ? $this->f3->SPA['foot'] : 'footer';
             $this->spa_script = <<<JS
 class vanilaSPA {
     constructor() {
-        this.siteName = "$appSpaName",
         /** default page container header, main, footer */
         this.siteHead = "$appSpaMain",
         this.siteMain = "$appSpaHead",
@@ -25,10 +23,10 @@ class vanilaSPA {
     }
     route = (event) => {
         event = event || window.event;
-        event.preventDefault(),
-        window.history.pushState({}, "", event.target.href),          
-        this.getPage()
-    }
+        event.preventDefault();
+        window.history.pushState({}, "", event.target.href);            
+        this.getPage();
+    };
     getPage = async () => { 
         const mainElement = document.querySelector(this.siteMain);   
         var tags = "",
@@ -38,51 +36,51 @@ class vanilaSPA {
             page = part ? part : 'index';
         /** make clear that content is not the same content*/
         if(mainElement.getAttribute("content") !== page){
-            var urls = part ? path.replace(page, `pages/\${page}`) : `\${path}/pages/index`,
-                html = await fetch(urls).then((data) => data.text()),
+            var html = await fetch(page).then((data) => data.text()),
                 htmc;
             mainElement.setAttribute('content',page);
-            /** handle error page 4** to 5** */
+            /** handle error page 4** to 5** 
+             * 
             if(html.match(/<title>(\s+)?(4|5)\d{1,2}\s/)){
-                html = await fetch(urls.replace(page,'404')).then((data) => data.text());
-                page = '404 ' +  page + ' Page Not Found'
+                html = await fetch(page.replace(page,'404')).then((data) => data.text());
             }
+            */
+            /** parsing html template title */
+            htmc = html.split(/(\\n)?<(\/)?title>(\\n)?/ig)[4];
+            document.title = htmc;
+
             /** parsing html template content */
-            htmc = html.split(/(\n)?<(\/)?template>(\n)?/ig)[4];
+            htmc = html.split(/(\\n)?<(\/)?main>(\\n)?/ig)[4];
             mainElement.innerHTML = htmc;
-            /** this is handling title */
-            if(part)
-                tags = page.toLowerCase().replace(/\b[a-z]/g, function(letter) {
-                    return letter.toUpperCase()
-                }) + " ~ ";
-            document.title = tags+this.siteName;
+
+            
             /** this is handling hashtags */
             if(this.getHash(1)){
                 var getIDElement = document.getElementById(this.getHash(1));
-                !getIDElement || window.scrollTo(0, getIDElement.offsetTop)
+                !getIDElement || window.scrollTo(0, getIDElement.offsetTop);
             }
         }
-    }
+    };
     getHash = (ints) => {
         const hashData = window.location.hash.split("#");
         return ints > 1 ? hashData[ints] : hashData[1];
     }
 }
 F3 = new vanilaSPA();
-console.log(F3.getHash());
 window.onpopstate = F3.getPage;
-window.onload = F3.getPage;
+/*window.onload = F3.getPage;*/
 document.addEventListener('click', function(event) {    
     /** Check if the clicked element is an <a> tag */ 
     const anchor = event.target.closest('a');    
     if (anchor){
         /** get the href attribute value to check if it starts with # */ 
         const href = anchor.getAttribute('href');
-        if (anchor.hasAttribute('href') && !anchor.hasAttribute('target') && !href.startsWith('#')) 
+        if (anchor.hasAttribute('href') && !anchor.hasAttribute('target') && !href.startsWith('#') && !href.match(/(http(s)?:)?\/\//)) 
             F3.route(event)
     }
 });
 JS;
+            $addSPAScript = $appSpaMain ? "\n$appSpaMain" : null;
             $this->pwa_script = <<<JS
 var staticCacheName = "pwa-$strtotime"; 
 self.addEventListener("install", function (e) {
@@ -98,7 +96,7 @@ self.addEventListener("fetch", function (event) {
         return response || fetch(event.request);
     })
     )
-});
+});$addSPAScript
 JS;
             $tmp_location = isset($this->f3->TEMP_MODELS) ?  $this->f3->TEMP_MODELS : false;
             !$tmp_location || $this->f3->set('TEMP', $tmp_location); 

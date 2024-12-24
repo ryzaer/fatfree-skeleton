@@ -95,6 +95,23 @@ self.addEventListener("fetch", function (event) {
     )
 });$addSPAScript
 JS;
+            
+            $tmp_location = isset($this->f3->TEMP_MODELS) ?  $this->f3->TEMP_MODELS : false;
+            !$tmp_location || $this->f3->set('TEMP', $tmp_location); 
+            defined('TEMP_MODELS') || define('TEMP_MODELS',!$tmp_location ? $this->f3->TEMP : $tmp_location); 
+            // automake view models if not exists
+            is_dir(TEMP_MODELS) || mkdir(TEMP_MODELS,0755,true);
+
+            // the constant to auto write custom views function in models folder
+            $auto_create = is_bool($this->f3->DEV['model']) ?  $this->f3->DEV['model'] : true; 
+            defined('AUTO_MODELS') || define('AUTO_MODELS',$auto_create);
+
+            // the constant to custom views function folder
+            $view_folder = isset($this->f3->VIEW_MODELS) && is_string($this->f3->VIEW_MODELS) ? $this->f3->VIEW_MODELS : 'app/models/';
+            defined('VIEW_MODELS') || define('VIEW_MODELS',$view_folder);
+            // auto make view models if not exists
+            is_dir(VIEW_MODELS) || mkdir(VIEW_MODELS,0755,true);
+            
             // add index vanila spa page
             $spa = <<<HTML
 <!DOCTYPE html>
@@ -122,7 +139,8 @@ JS;
     <script src="assets/js/app.js?v={{time()}}"></script>
 </html>
 HTML;
-            if($this->f3->APP['mode_spa']){
+            // make spa index experimantal
+            if(AUTO_MODELS && $this->f3->APP['mode_spa']){
                 file_exists("app/templates/spa_index.htm") || $this->f3->write("app/templates/spa_index.htm",$spa,true);
                 foreach ([
                     "scripts"=>"app.js",
@@ -132,21 +150,6 @@ HTML;
                     file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */",true);
                 }
             }
-            $tmp_location = isset($this->f3->TEMP_MODELS) ?  $this->f3->TEMP_MODELS : false;
-            !$tmp_location || $this->f3->set('TEMP', $tmp_location); 
-            defined('TEMP_MODELS') || define('TEMP_MODELS',!$tmp_location ? $this->f3->TEMP : $tmp_location); 
-            // automake view models if not exists
-            is_dir(TEMP_MODELS) || mkdir(TEMP_MODELS,0755,true);
-
-            // the constant to auto write custom views function in models folder
-            $auto_create = is_bool($this->f3->DEV['model']) ?  $this->f3->DEV['model'] : true; 
-            defined('AUTO_MODELS') || define('AUTO_MODELS',$auto_create);
-
-            // the constant to custom views function folder
-            $view_folder = isset($this->f3->VIEW_MODELS) && is_string($this->f3->VIEW_MODELS) ? $this->f3->VIEW_MODELS : 'app/models/';
-            defined('VIEW_MODELS') || define('VIEW_MODELS',$view_folder);
-            // auto make view models if not exists
-            is_dir(VIEW_MODELS) || mkdir(VIEW_MODELS,0755,true);
 
             $this->f3->set('assign',function(...$args){                
                 /**

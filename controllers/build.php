@@ -128,7 +128,7 @@ JS;
     <body>
         <header>
             <div class="container">
-                <b>This is SPA Header</b>
+                <b>This is Header</b>
             </div>
         </header>
         <main>
@@ -138,7 +138,7 @@ JS;
         </main>
         <footer>
             <div class="container">
-                <b>This is SPA Footer</b>
+                <b>This is Footer</b>
             </div>
         </footer>
     </body>

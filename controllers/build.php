@@ -186,8 +186,10 @@ CSS;
                 file_exists("app/templates/spa_index.htm") || $this->f3->write("app/templates/spa_index.htm",$spa,true);
                 foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
                     is_dir("app/templates/{$key}") || mkdir("app/templates/{$key}",0755,true);
-                    $def_css = $key == "styles" ? "\n$def_css" : "";
-                    file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */$def_css",true);
+                    $add_style =  "";
+                    if($key == "styles")
+                        $add_style = "\n$def_css" ;
+                    file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */$add_style",true);
                 }
             }
 

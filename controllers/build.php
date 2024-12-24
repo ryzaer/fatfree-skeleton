@@ -133,9 +133,10 @@ JS;
         </header>
         <main>
             <div class="container">
-                <h3>Welcome! This is SPA Content page</h3>             
+                <noscript><b>You need to enable JavaScript to run this app.</b></noscript>
+                <h3>Welcome! This is SPA Content page</h3>   
+                <p>Simple FATFREE customizable MVC, functionally patterned, arrangement and writing custom function automatically also SPA & PWA Integration.</p>          
             </div>
-            <noscript>You need to enable JavaScript to run this app.</noscript>
         </main>
         <footer>
             <div class="container">

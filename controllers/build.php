@@ -95,6 +95,35 @@ self.addEventListener("fetch", function (event) {
     )
 });$addSPAScript
 JS;
+            // add index vanila spa page
+            $spa = <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{@APP.name}}</title>
+        <link rel="manifest" href="manifest.json">
+        <link rel="shortcut icon" href="assets/img/icon-192.png" type="image/x-icon">
+        <link rel="stylesheet" href="assets/css/app.css">
+    </head>
+    <body>
+        <header>
+            <b>This is SPA Header</b>
+        </header>
+        <main>
+            <h3>Welcome, this is SPA Content page</h3>
+        </main>
+        <footer>
+            <b>This is SPA Footer</b>
+        </footer>
+    </body>
+    <script src="assets/js/app.js"></script>
+</html>
+HTML;
+            if($this->f3->APP['mode_spa'])
+                file_exists("app/templates/spa_index.htm") || $this->f3->write("app/templates/spa_index.htm",$spa,true);
             $tmp_location = isset($this->f3->TEMP_MODELS) ?  $this->f3->TEMP_MODELS : false;
             !$tmp_location || $this->f3->set('TEMP', $tmp_location); 
             defined('TEMP_MODELS') || define('TEMP_MODELS',!$tmp_location ? $this->f3->TEMP : $tmp_location); 
@@ -132,12 +161,13 @@ JS;
         <title>{{@data.title}}</title>
     </head>
     <body id="{{@uuid}}">
-        <h1>{{@data.content}}</h1>
+        <main>
+            <h1>{{@data.content}}</h1>
+        </main>
     </body>
 </html>
 HTML;
                 file_exists($htm) || $this->f3->write($htm,$ptn,true);
-
                 $main = true;    
                 $call = [];            
                 $deff = false;

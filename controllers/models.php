@@ -144,23 +144,25 @@ class models
     </style>
   </head>
   <body>
-    <h1>Error {{@ERROR.code}} : {{@ERROR.status}}</h1>
-    <h3># {{@ERROR.text}}</h3> 
-    <pre>
-      <code>
-<loop from="{{ @i=0 }}" to="{{ @i < @error_count }}" step="{{ @i++ }}">
-{{((@error_count-1) == @i ?  '└──' : '├──').@error_trace[@i]}}<br/>
-</loop>
-      </code>
-    </pre>
-    <section>
-      <p>You are trying to access <b>{{@PATH}}</b> that is not associate with our web, follow the instructions below;</p>
-      <ul>
-        <repeat group="{{ @recommended }}" key="{{ @ikey }}" value="{{ @ival }}">
-          <li>{{ @ival }}</li>
-        </repeat>
-      </ul>
-    </section>
+    <main>
+        <h1>Error {{@ERROR.code}} : {{@ERROR.status}}</h1>
+        <h3># {{@ERROR.text}}</h3> 
+        <pre>
+        <code>
+    <loop from="{{ @i=0 }}" to="{{ @i < @error_count }}" step="{{ @i++ }}">
+    {{((@error_count-1) == @i ?  '└──' : '├──').@error_trace[@i]}}<br/>
+    </loop>
+        </code>
+        </pre>
+        <section>
+        <p>You are trying to access <b>{{@PATH}}</b> that is not associate with our web, follow the instructions below;</p>
+        <ul>
+            <repeat group="{{ @recommended }}" key="{{ @ikey }}" value="{{ @ival }}">
+            <li>{{ @ival }}</li>
+            </repeat>
+        </ul>
+        </section>
+    </main>
   </body>
 </html>
 HTML;

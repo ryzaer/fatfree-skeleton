@@ -133,16 +133,17 @@ JS;
         </header>
         <main>
             <div class="container">
-                <h3>Welcome, this is SPA Content page</h3>
+                <h3>Welcome! This is SPA Content page</h3>             
             </div>
+            <noscript>You need to enable JavaScript to run this app.</noscript>
         </main>
         <footer>
             <div class="container">
                 <b>This is Footer</b>
             </div>
         </footer>
+        <script src="assets/js/app.js?v={{time()}}"></script>
     </body>
-    <script src="assets/js/app.js?v={{time()}}"></script>
 </html>
 HTML;
             // make spa index experimental

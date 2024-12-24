@@ -122,8 +122,16 @@ JS;
     <script src="assets/js/app.js"></script>
 </html>
 HTML;
-            if($this->f3->APP['mode_spa'])
+            if($this->f3->APP['mode_spa']){
                 file_exists("app/templates/spa_index.htm") || $this->f3->write("app/templates/spa_index.htm",$spa,true);
+                foreach ([
+                    "scripts"=>"app.js",
+                    "styles"=>"app.css"
+                ] as $key => $value) {
+                    is_dir("app/templates/{$key}") || mkdir("app/templates/{$key}",0755,true);
+                    file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */",true);
+                }
+            }
             $tmp_location = isset($this->f3->TEMP_MODELS) ?  $this->f3->TEMP_MODELS : false;
             !$tmp_location || $this->f3->set('TEMP', $tmp_location); 
             defined('TEMP_MODELS') || define('TEMP_MODELS',!$tmp_location ? $this->f3->TEMP : $tmp_location); 

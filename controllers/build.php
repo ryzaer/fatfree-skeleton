@@ -106,7 +106,7 @@ JS;
         <title>{{@APP.name}}</title>
         <link rel="manifest" href="manifest.json">
         <link rel="shortcut icon" href="assets/img/icon-192.png" type="image/x-icon">
-        <link rel="stylesheet" href="assets/css/app.css">
+        <link rel="stylesheet" href="assets/css/app.css?v={{time()}}">
     </head>
     <body>
         <header>
@@ -119,7 +119,7 @@ JS;
             <b>This is SPA Footer</b>
         </footer>
     </body>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v={{time()}}"></script>
 </html>
 HTML;
             if($this->f3->APP['mode_spa']){

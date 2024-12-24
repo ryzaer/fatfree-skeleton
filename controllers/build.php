@@ -145,7 +145,7 @@ JS;
     <script src="assets/js/app.js?v={{time()}}"></script>
 </html>
 HTML;
-            // make spa index experimantal
+            // make spa index experimental
             if(AUTO_MODELS && $this->f3->APP['mode_spa']){
                 $def_css=<<<CSS
 @import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css");

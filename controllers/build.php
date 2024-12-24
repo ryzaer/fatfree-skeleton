@@ -127,13 +127,19 @@ JS;
     </head>
     <body>
         <header>
-            <b>This is SPA Header</b>
+            <div class="container">
+                <b>This is SPA Header</b>
+            </div>
         </header>
         <main>
-            <h3>Welcome, this is SPA Content page</h3>
+            <div class="container">
+                <h3>Welcome, this is SPA Content page</h3>
+            </div>
         </main>
         <footer>
-            <b>This is SPA Footer</b>
+            <div class="container">
+                <b>This is SPA Footer</b>
+            </div>
         </footer>
     </body>
     <script src="assets/js/app.js?v={{time()}}"></script>
@@ -141,13 +147,47 @@ JS;
 HTML;
             // make spa index experimantal
             if(AUTO_MODELS && $this->f3->APP['mode_spa']){
+                $def_css=<<<CSS
+@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap");
+
+html,
+body{
+  height:100%;  
+}
+body{
+  font-family: "Lato", sans-serif;
+  display:table;  
+  width:100%;
+}
+header,
+main,
+footer{
+  display:table-row;
+  height:1px;    
+}
+main{
+  height:100%;  
+}
+footer {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  /* background-color: #f1f1f1; */
+  color: #444;
+  text-align: center;
+}
+.container{
+    padding: 10px;
+}
+
+/* Add next styles here */
+CSS;
                 file_exists("app/templates/spa_index.htm") || $this->f3->write("app/templates/spa_index.htm",$spa,true);
-                foreach ([
-                    "scripts"=>"app.js",
-                    "styles"=>"app.css"
-                ] as $key => $value) {
+                foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
                     is_dir("app/templates/{$key}") || mkdir("app/templates/{$key}",0755,true);
-                    file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */",true);
+                    $def_css = $key == "styles" ? "\n$def_css" : "";
+                    file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */$def_css",true);
                 }
             }
 

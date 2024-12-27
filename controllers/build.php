@@ -16,35 +16,42 @@ class vanilaSPA {
         /** default page container header, main, footer */
         this.siteHead = "header",
         this.siteMain = "main",
-        this.siteFoot = "footer"
+        this.siteFoot = "footer",
+        this.namePage = "pg-stat-name",
+        this.nameStat = "pg-stat-load";
+        const getMain = document.querySelector(this.siteMain);
+        /** make name page as same as url */
+        if(!getMain.getAttribute(this.namePage)){
+            getMain.setAttribute(this.namePage,this.getPart());
+        } 
     }
     route = (event) => {
         event = event || window.event;
         event.preventDefault();
-        window.history.pushState({}, "", event.target.href);            
+        window.history.pushState({}, "", event.target.href);                   
         this.getPage();
+    };
+    getPart = () => {
+        var path = window.location.pathname.split("/"),
+            part = path[path.length - 1].trim();
+            return part ? part : 'index'
     };
     getPage = async () => { 
         const mainElement = document.querySelector(this.siteMain);
-        var tags = "",
-            path = window.location.pathname.split("/"),
-            part = path[path.length - 1].trim(),
-            page = part ? part : 'index',
-            pgst = "pg-stat-name",
-            stat = "pg-stat-progress";
+        var page = this.getPart();
 
-        /** make page still processing */
-        if(!mainElement.getAttribute(stat)){
-            mainElement.setAttribute(stat,'loaded');
+        /** make page status processing */
+        if(!mainElement.getAttribute(this.nameStat)){
+            mainElement.setAttribute(this.nameStat,'loaded');
         }
 
         /** make clear that content is not the same content*/
-        if(mainElement.getAttribute(stat) == 'loaded'){
+        if(mainElement.getAttribute(this.nameStat) == 'loaded'){
             
             /** check hash and page name is not the same */
-            if(!window.location.hash || mainElement.getAttribute(pgst) != page){
+            if(!window.location.hash || mainElement.getAttribute(this.namePage) != page){
                 /** send status page processing */
-                mainElement.setAttribute(stat,'process');
+                mainElement.setAttribute(this.nameStat,'process');
 
                 var html = await fetch(page).then((data) => data.text()),
                 htmc;
@@ -63,21 +70,16 @@ class vanilaSPA {
                 mainElement.innerHTML = htmc;
 
                 /** send content status page already loaded */
-                mainElement.setAttribute(stat,'loaded');
+                mainElement.setAttribute(this.nameStat,'loaded');
             }
             
-            /** make name page as same as url */
-            if(!mainElement.getAttribute(pgst)){
-                mainElement.setAttribute(pgst,page);
-            }
-
             /** this is handling hashtags */
             if(this.getHash(1)){
                 var getIDElement = document.getElementById(this.getHash(1));
                 !getIDElement || window.scrollTo(0, getIDElement.offsetTop);
             }
-            /** send status named page */
-            mainElement.setAttribute(pgst,page);
+            /** send status named page same as url */
+            mainElement.setAttribute(this.namePage,page);
         }else{
             console.log("page still loading");
         }

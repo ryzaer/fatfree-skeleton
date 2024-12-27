@@ -25,37 +25,61 @@ class vanilaSPA {
         this.getPage();
     };
     getPage = async () => { 
-        const mainElement = document.querySelector(this.siteMain);   
+        const mainElement = document.querySelector(this.siteMain);
         var tags = "",
-            path = window.location.pathname,
-            part = path.split("/"),
-            part = part[part.length - 1].trim(),
-            page = part ? part : 'index';
+            path = window.location.pathname.split("/"),
+            part = path[path.length - 1].trim(),
+            page = part ? part : 'index',
+            pgst = "pg-stat-name",
+            stat = "pg-stat-progress";
+
+        /** make page still processing */
+        if(!mainElement.getAttribute(stat)){
+            mainElement.setAttribute(stat,'loaded');
+        }
+
         /** make clear that content is not the same content*/
-        if(mainElement.getAttribute("content") !== page){
-            var html = await fetch(page).then((data) => data.text()),
-                htmc;
-            mainElement.setAttribute('content',page);
-            /** handle error page 4** to 5** 
-             * 
-            if(html.match(/<title>(\s+)?(4|5)\d{1,2}\s/)){
-                html = await fetch(page.replace(page,'404')).then((data) => data.text());
-            }
-            */
-            /** parsing html template title */
-            htmc = html.split(/<(\/)?title((\s+)?([\w-]+="[^"]*")?)+?>/ig)[5];
-            document.title = htmc;
-
-            /** parsing html template content */
-            htmc = html.split(/<(\/)?main((\s+)?([\w-]+="[^"]*")?)+?>/ig)[5];
-            mainElement.innerHTML = htmc;
-
+        if(mainElement.getAttribute(stat) == 'loaded'){
             
+            /** check hash and page name is not the same */
+            if(!window.location.hash || mainElement.getAttribute(pgst) != page){
+                /** send status page processing */
+                mainElement.setAttribute(stat,'process');
+
+                var html = await fetch(page).then((data) => data.text()),
+                htmc;
+                /** handle error page 4** to 5** 
+                 * 
+                if(html.match(/<title>(\s+)?(4|5)\d{1,2}\s/)){
+                    html = await fetch(page.replace(page,'404')).then((data) => data.text());
+                }
+                */
+                /** parsing html template title */
+                htmc = html.split(/<(\/)?title((\s+)?([\w-]+="[^"]*")?)+?>/ig)[5];
+                document.title = htmc;
+
+                /** parsing html template content */
+                htmc = html.split(/<(\/)?main((\s+)?([\w-]+="[^"]*")?)+?>/ig)[5];
+                mainElement.innerHTML = htmc;
+
+                /** send content status page already loaded */
+                mainElement.setAttribute(stat,'loaded');
+            }
+            
+            /** make name page as same as url */
+            if(!mainElement.getAttribute(pgst)){
+                mainElement.setAttribute(pgst,page);
+            }
+
             /** this is handling hashtags */
             if(this.getHash(1)){
                 var getIDElement = document.getElementById(this.getHash(1));
                 !getIDElement || window.scrollTo(0, getIDElement.offsetTop);
             }
+            /** send status named page */
+            mainElement.setAttribute(pgst,page);
+        }else{
+            console.log("page still loading");
         }
     };
     getHash = (ints) => {

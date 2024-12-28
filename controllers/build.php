@@ -38,7 +38,7 @@ class vanilaSPA {
     };
     getPage = async () => { 
         const mainElement = document.querySelector(this.siteMain);
-        var page = this.getPart();
+        var grab=true,page = this.getPart();
 
         /** make page status processing */
         if(!mainElement.getAttribute(this.nameStat)){
@@ -47,9 +47,17 @@ class vanilaSPA {
 
         /** make clear that content is not the same content*/
         if(mainElement.getAttribute(this.nameStat) == 'loaded'){
-            
-            /** check hash and page name is not the same */
-            if(!window.location.hash || mainElement.getAttribute(this.namePage) != page){
+            /** check thee url with hash and in same page */
+            if(window.location.hash)
+                grab=false;
+
+            /** check if query url available allow to load the page */
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.size > 0)
+                grab=true;
+
+            /** check page name is not the same & grab value is true */
+            if(grab || mainElement.getAttribute(this.namePage) != page){
                 /** send status page processing */
                 mainElement.setAttribute(this.nameStat,'process');
 

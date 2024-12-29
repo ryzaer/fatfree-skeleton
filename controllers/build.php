@@ -117,14 +117,14 @@ var staticCacheName = "pwa-$strtotime";
 self.addEventListener("install", function (e) {
     e.waitUntil(
     caches.open(staticCacheName).then(function (cache) {
-        return cache.addAll(["/"]);
+        return cache.addAll(["/"])
     })
     )
 }); 
 self.addEventListener("fetch", function (event) {
     vent.respondWith(
     caches.match(event.request).then(function (response) {
-        return response || fetch(event.request);
+        return response || fetch(event.request)
     })
     )
 });$addSPAScript
@@ -386,7 +386,7 @@ setInterval(async () => {
         if(!body.dataset.stat)
             body.setAttribute('data-stat',text);
         if(body.dataset.stat != text)
-            location.reload();
+            location.reload()
     })
 },1200);  
 JS;

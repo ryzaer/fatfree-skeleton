@@ -3,11 +3,11 @@
 // __fn::open_method(args_algo,str);
 // $str = __fn::open_method('encrypt','str');
 // print __fn::open_method('decrypt',$str);
-// $str = __fn::open_method('ehash','str'); // for hex result
+// $str = __fn::open_method('ehash','str'); // for hash result
 // print __fn::open_method('dhash',$str);
 // $str = __fn::open_method('en_tiger','str');
 // print __fn::open_method('de_tiger',$str);
-// $str = __fn::open_method('eh_sha','str'); // for hex result
+// $str = __fn::open_method('eh_sha','str'); // for hash result
 // print __fn::open_method('dh_sha',$str);
 // try more for algo 40 chars array list
 function open_method($args, $string, $salt=6621) {

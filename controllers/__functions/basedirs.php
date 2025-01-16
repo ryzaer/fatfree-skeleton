@@ -32,7 +32,6 @@ function basedirs($location,$regxfile=null,$assoc=false){
                         }
                 }    
             } 
-        !$handle || closedir($handle);
     }    
     return $basedirs;  
 }

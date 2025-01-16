@@ -19,3 +19,7 @@ function open_folder($location){
         \RecursiveIteratorIterator::LEAVES_ONLY
     );
 }
+
+function spider($dir,$fileName=""){
+     
+}

@@ -239,7 +239,7 @@ CSS;
                 $this->f3->db || die('<i style="color:red">Assign function need database connection!<br>check \'SQL\' in [global] settings (ini file extension)</i>');
                 
                 $prm = explode('/',substr($this->f3->PATH,1));
-                $htm = "app/templates/{$prm[0]}.htm";
+                $htm = "{$prm[0]}.htm";
                 $ptn = <<<HTML
 <!DOCTYPE html>
 <html lang="en">
@@ -256,7 +256,7 @@ CSS;
     </body>
 </html>
 HTML;
-                file_exists($htm) || $this->f3->write($htm,$ptn,true);
+                file_exists("app/templates/$htm") || $this->f3->write("app/templates/$htm",$ptn,true);
                 $main = true;    
                 $call = [];            
                 $deff = false;
@@ -307,6 +307,7 @@ HTML;
                 return \Template::instance()->render($file,$mime);
             }); 
             $this->f3->set('view',function($file,$mime=null) {
+                $file = "app/templates/$file";
                 if(AUTO_MODELS && $this->f3->APP){
 
                     $manifest = [];

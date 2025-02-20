@@ -175,7 +175,7 @@ HTML;
                 "\$f3->error_trace = array_values(array_filter(preg_split('/\\n/',\$f3->get(\"ERROR.trace\"))));",
 	            "\$f3->error_count = count(\$f3->error_trace);",
                 "http_response_code(\$f3->get(\"ERROR.code\"));",
-                "\$f3->view('app/templates/error.htm');"
+                "\$f3->view('error.htm');"
             ]);
             file_exists('app/templates/error.htm') || file_put_contents('app/templates/error.htm',$htmlt);
         }

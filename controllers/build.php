@@ -133,6 +133,9 @@ JS;
             }
             /** send status named page same as url */
             mainElement.setAttribute(this.namePage,page);
+            /** add another script here */
+            if(typeof this.addScript === 'function')
+                this.addScript()
         }else{
             console.log("page still loading");
         }
@@ -155,6 +158,8 @@ class vanilaSPA {
 }
 F3 = new vanilaSPA();
 window.onpopstate = F3.getPage;
+if(typeof F3.addScript === 'function')
+    F3.addScript();
 /*window.onload = F3.getPage;*/
 document.addEventListener('click', function(event) {    
     /** Check if the clicked element is an <a> tag */ 
@@ -364,6 +369,7 @@ HTML;
             }); 
             $this->f3->set('view',function($file,$mime=null) {
                 $file = "app/templates/$file";
+                $mime = is_callable($mime) ? null : $mime; 
                 if(AUTO_MODELS && $this->f3->APP){
 
                     $manifest = [];
@@ -454,6 +460,7 @@ JS;
                 }
                 // var_dump($this);
                 // this is how spa works on view function
+                $call = is_callable($mime) ? $mime : null; 
                 if(AUTO_MODELS && $this->f3->APP['mode_spa']){
                     foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
                         $asset = "assets/".substr($value,4);

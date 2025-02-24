@@ -9,10 +9,59 @@ class build {
             $strtotime = strtotime(date('Y-m-d H:i:s'));
             // the constant to auto write custom views function in models folder
             $this->const = true;
-            // for spa & pwa content
-            $this->spa_script = <<<JS
-class vanilaSPA {
-    constructor() {
+            // for js get script and style
+            $this->get_script_const = <<<JS
+        /** add some custom style and script per page */
+        this.onStyle = [],
+        this.onScript = [];
+JS;
+            // this is js for get page name
+            $this->get_path_pgname = <<<JS
+    getPart = () => {
+        var path = window.location.pathname.split("/"),
+            part = path[path.length - 1].trim();
+            return part ? part : 'index'
+    };
+JS;
+            // this is alternative getScript funtion in jQuery
+            $this->get_script_funct = <<<JS
+    /**GET SCRIPT */
+    addScript = () =>{
+        if(this.onStyle[this.getPart()])
+            this.onStyle[this.getPart()].forEach((val) => this.getStyle(val));
+        if(this.onScript[this.getPart()])
+            this.onScript[this.getPart()].forEach((val) => this.getScript(val));
+    };
+    getScript = (url) => {
+        if (document.querySelector(`script[src="\${url}"]`)){
+            console.log(url + 'already loaded');
+            return Promise.resolve(); 
+        }
+        return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = url;
+            script.async = true;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+        })
+    };
+    getStyle = (url) => {
+        if (document.querySelector(`link[href="\${url}"]`)) {
+            console.log(url + 'already loaded');
+            return Promise.resolve(); 
+        }
+        return new Promise((resolve, reject) => {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = url;
+            link.onload = resolve;
+            link.onerror = reject;
+            document.head.appendChild(link);
+        })
+    };
+JS;
+            $this->spa_script_const = <<<JS
         /** default page container header, main, footer */
         this.siteHead = "header",
         this.siteMain = "main",
@@ -23,27 +72,23 @@ class vanilaSPA {
         /** make name page as same as url */
         if(!getMain.getAttribute(this.namePage)){
             getMain.setAttribute(this.namePage,this.getPart());
-        } 
-    }
+        }
+    
+JS;
+            $this->spa_script_funct = <<<JS
     route = (event) => {
         event = event || window.event;
         event.preventDefault();
         window.history.pushState({}, "", event.target.href);                   
         this.getPage();
     };
-    getPart = () => {
-        var path = window.location.pathname.split("/"),
-            part = path[path.length - 1].trim();
-            return part ? part : 'index'
-    };
     getPage = async () => { 
         const mainElement = document.querySelector(this.siteMain);
         var grab=true,page = this.getPart();
 
         /** make page status processing */
-        if(!mainElement.getAttribute(this.nameStat)){
-            mainElement.setAttribute(this.nameStat,'loaded');
-        }
+        if(!mainElement.getAttribute(this.nameStat))
+            mainElement.setAttribute(this.nameStat,'loaded');        
 
         /** make clear that content is not the same content*/
         if(mainElement.getAttribute(this.nameStat) == 'loaded'){
@@ -95,7 +140,18 @@ class vanilaSPA {
     getHash = (ints) => {
         const hashData = window.location.hash.split("#");
         return ints > 1 ? hashData[ints] : hashData[1];
+    };
+JS;
+            // for spa & pwa content
+            $this->spa_script = <<<JS
+class vanilaSPA {
+    constructor() {         
+        {$this->spa_script_const}
+        {$this->get_script_const}
     }
+    {$this->get_path_pgname}
+    {$this->spa_script_funct}
+    {$this->get_script_funct}
 }
 F3 = new vanilaSPA();
 window.onpopstate = F3.getPage;
@@ -349,7 +405,7 @@ HTML;
                     }
                     file_put_contents("manifest.json", json_encode($manifest));                    
                 }
-                if(file_exists($file)){  
+                if(file_exists($file)){ 
                     preg_match('/\.pug/',$file,$match);
                     if($match){
                         // adding parse pug template engine here
@@ -396,6 +452,18 @@ JS;
                         }
                     }
                 }
+                // var_dump($this);
+                // this is how spa works on view function
+                if(AUTO_MODELS && $this->f3->APP['mode_spa']){
+                    foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
+                        $asset = "assets/".substr($value,4);
+                        is_dir($asset) || mkdir($asset,0755,true);
+                        if($value == 'app.css')
+                            file_exists("$asset/$value") || $this->f3->write("$asset/$value",file_get_contents("app/templates/{$key}/$value"),true);
+                        if($value == 'app.js')
+                            file_exists("$asset/$value") || $this->f3->write("$asset/$value",$this->spa_script,true);
+                    }
+                }
             });
             $this->f3->set('script',function($ext,$filename=[]){
                 $src = [
@@ -437,7 +505,6 @@ JS;
                     }
                     $index = $asset ? $index : null;
                     file_put_contents("assets/$ext/$index",implode($this->f3->DEV['minified'] ? "":"\n",$asset));
-                    // file_put_contents("assets/js/$index",implode("\n",$asset)."\n",FILE_APPEND);
                 }
                 return file_exists("assets/$ext/$index") ? "assets/$ext/$index?__=".time() : null;
             });

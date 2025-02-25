@@ -526,7 +526,9 @@ JS;
                     }
                     
                     $spa_script = sprintf($this->pwa_script,$prop->css,$prop->js); 
-                    // $spa_script = $this->pwa_script; 
+                    if($this->f3->DEV['minified'])
+                        $spa_script = \__fn::minify('js',$spa_script);
+
                     foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
                         $asset = "assets/".substr($value,4);
                         is_dir($asset) || mkdir($asset,0755,true);

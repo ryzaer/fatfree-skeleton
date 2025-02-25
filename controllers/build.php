@@ -34,7 +34,7 @@ JS;
     };
     getScript = (url) => {
         if (document.querySelector(`script[src="\${url}"]`)){
-            console.log(url + ' already loaded');
+            /*console.log(url + ' already loaded');*/
             return Promise.resolve(); 
         }
         return new Promise((resolve, reject) => {
@@ -48,7 +48,7 @@ JS;
     };
     getStyle = (url) => {
         if (document.querySelector(`link[href="\${url}"]`)) {
-            console.log(url + ' already loaded');
+            /*console.log(url + ' already loaded');*/
             return Promise.resolve(); 
         }
         return new Promise((resolve, reject) => {

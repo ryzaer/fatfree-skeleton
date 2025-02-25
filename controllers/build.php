@@ -12,8 +12,8 @@ class build {
             // for js get script and style
             $this->get_script_const = <<<JS
         /** add some custom style and script per page */
-        this.onStyle = [],
-        this.onScript = [];
+        this.onStyle = %s,
+        this.onScript = %s;
 JS;
             // this is js for get page name
             $this->get_path_pgname = <<<JS
@@ -160,6 +160,7 @@ F3 = new vanilaSPA();
 window.onpopstate = F3.getPage;
 if(typeof F3.addScript === 'function')
     F3.addScript();
+alert(F3.getPart());
 /*window.onload = F3.getPage;*/
 document.addEventListener('click', function(event) {    
     /** Check if the clicked element is an <a> tag */ 
@@ -281,12 +282,15 @@ footer {
 /* Add next styles here */
 CSS;
                 file_exists("app/templates/spa_index.htm") || $this->f3->write("app/templates/spa_index.htm",$spa,true);
+                // foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
                 foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
                     is_dir("app/templates/{$key}") || mkdir("app/templates/{$key}",0755,true);
                     $add_style =  "";
-                    if($key == "styles")
+                    if($key == "styles"){
                         $add_style = "\n$def_css" ;
-                    file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */$add_style",true);
+                        /** only for css */
+                        file_exists("app/templates/{$key}/{$value}") || $this->f3->write("app/templates/{$key}/{$value}","/** custom {$key} here */$add_style",true);
+                    }
                 }
             }
 
@@ -369,6 +373,7 @@ HTML;
             }); 
             $this->f3->set('view',function($file,$mime=null) {
                 $file = "app/templates/$file";
+                $call = is_callable($mime) ? $mime : null; 
                 $mime = is_callable($mime) ? null : $mime; 
                 if(AUTO_MODELS && $this->f3->APP){
 
@@ -460,16 +465,81 @@ JS;
                 }
                 // var_dump($this);
                 // this is how spa works on view function
-                $call = is_callable($mime) ? $mime : null; 
                 if(AUTO_MODELS && $this->f3->APP['mode_spa']){
+                    // get callback function and object property from $mime value
+                    $prop = (object)[];
+                    $prop->css ='[]';
+                    $prop->js ='[]';
+                    if($call){
+                        call_user_func($call,$prop); 
+                        $node_path = substr($this->f3->PATH,1);
+                        $node_path = $node_path ? $node_path : "index";
+                        // generating css and json
+                        if(is_array($prop->css)){
+                            $pcss = [];
+                            $cdir = "app/templates/styles";
+                            // is_dir($cdir) || mkdir($cdir,0755,true);
+                            foreach ($prop->css as $scr) {
+                                $putloc = $scr;
+                                if(!preg_match('/(http(s)?:)?\/\//',$scr)){
+                                    file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
+                                    $putscr = file_get_contents("$cdir/$scr");
+                                    $putloc = "assets/css/$scr";
+                                    file_put_contents($putloc,$putscr);
+                                }
+                                $pcss[] = $putloc;
+                            }
+                            if($pcss){
+                                $tmjson = "{$this->f3->TEMP}/page_css.json";
+                                file_exists($tmjson) || file_put_contents($tmjson,"{}");
+                                $json = json_decode(file_get_contents($tmjson),true);
+                                unset($json[$node_path]);
+                                $prop->css = json_encode(array_merge($json,[$node_path=>$pcss]));
+                                file_put_contents($tmjson,$prop->css);
+                            }
+                        }
+                        // generating js and json
+                        if(is_array($prop->js)){
+                            $p_js = [];
+                            $cdir = "app/templates/scripts";
+                            // is_dir($cdir) || mkdir($cdir,0755,true);
+                            is_dir("assets/js/node") || mkdir("assets/js/node",0755,true);
+                            foreach ($prop->js as $scr) {
+                                $putloc = $scr;
+                                if(!preg_match('/(http(s)?:)?\/\//',$scr)){
+                                    file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
+                                    $putscr = file_get_contents("$cdir/$scr");
+                                    $putloc = "assets/js/node/".md5($scr).".js";
+                                    file_put_contents($putloc,$putscr);
+                                }
+                                $p_js[] = $putloc;
+                            }
+
+                            if($p_js){                                
+                                $tmjson = "{$this->f3->TEMP}/page_js.json";
+                                file_exists($tmjson) || file_put_contents($tmjson,"{}");
+                                $json = json_decode(file_get_contents($tmjson),true);
+                                unset($json[$node_path]);
+                                $prop->js = json_encode(array_merge($json,[$node_path=>$p_js]));
+                                file_put_contents($tmjson,$prop->js);
+                            }
+                        }
+                    }
+                    
+                    $spa_script = sprintf($this->pwa_script,$prop->css,$prop->js); 
+                    // $spa_script = $this->pwa_script; 
                     foreach (["scripts"=>"app.js","styles"=>"app.css"] as $key => $value) {
                         $asset = "assets/".substr($value,4);
                         is_dir($asset) || mkdir($asset,0755,true);
                         if($value == 'app.css')
+                            /** this only writes once for example so use f3->write */
                             file_exists("$asset/$value") || $this->f3->write("$asset/$value",file_get_contents("app/templates/{$key}/$value"),true);
                         if($value == 'app.js')
-                            file_exists("$asset/$value") || $this->f3->write("$asset/$value",$this->spa_script,true);
+                            if(!file_exists("$asset/$value") || $call)
+                                /** if you use f3->write, it will add as chunks because fopen mode */
+                                file_put_contents("$asset/$value",$spa_script,true);
                     }
+
                 }
             });
             $this->f3->set('script',function($ext,$filename=[]){

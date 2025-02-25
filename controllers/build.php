@@ -34,7 +34,7 @@ JS;
     };
     getScript = (url) => {
         if (document.querySelector(`script[src="\${url}"]`)){
-            console.log(url + 'already loaded');
+            console.log(url + ' already loaded');
             return Promise.resolve(); 
         }
         return new Promise((resolve, reject) => {
@@ -48,7 +48,7 @@ JS;
     };
     getStyle = (url) => {
         if (document.querySelector(`link[href="\${url}"]`)) {
-            console.log(url + 'already loaded');
+            console.log(url + ' already loaded');
             return Promise.resolve(); 
         }
         return new Promise((resolve, reject) => {
@@ -160,7 +160,6 @@ F3 = new vanilaSPA();
 window.onpopstate = F3.getPage;
 if(typeof F3.addScript === 'function')
     F3.addScript();
-alert(F3.getPart());
 /*window.onload = F3.getPage;*/
 document.addEventListener('click', function(event) {    
     /** Check if the clicked element is an <a> tag */ 

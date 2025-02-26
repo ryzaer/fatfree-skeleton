@@ -526,8 +526,8 @@ JS;
                     $prop->js ='[]';
                     if($call){
                         call_user_func($call,$prop); 
-                        $node_path = substr($this->f3->PATH,1);
-                        $node_path = $node_path ? $node_path : "index";
+                        $node_path = explode("/",substr($this->f3->PATH,1));
+                        $node_path = $node_path[0] ? $node_path[0] : "index";
                         // generating css and json
                         if(is_array($prop->css))
                             $prop->css = __add_pwa_pgscript($node_path,$prop->css,"app/templates/styles","assets/css","page_css.json",$this->f3->TEMP,$this->f3->DEV['minified']);

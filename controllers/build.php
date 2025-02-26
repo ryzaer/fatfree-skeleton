@@ -465,6 +465,61 @@ JS;
                 // var_dump($this);
                 // this is how spa works on view function
                 if(AUTO_MODELS && $this->f3->APP['mode_spa']){
+                    if(!function_exists('__add_pwa_pgscript')){
+/**
+ * Generates and stores minified versions of scripts and stylesheets for a given node path.
+ *
+ * This function processes an array of script or stylesheet paths, minifies the content if necessary,
+ * and stores the processed files in the specified directory. It also updates a JSON file with the 
+ * paths to these processed files for the given node path.
+ *
+ * @param string $node_path The path identifier for the node.
+ * @param array $arrs An array of script or stylesheet paths to process.
+ * @param string $cdir The directory where original files are located.
+ * @param string $dir The directory where minified files will be stored.
+ * @param string $fjson The filename of the JSON file that stores the processed file paths.
+ * @param string $temp A temporary directory for storing the JSON file.
+ * @param bool $shrink Indicates whether the files should be minified.
+ * @return string JSON encoded array of paths to the processed files.
+ */
+
+                        function __add_pwa_pgscript($node_path,$arrs,$cdir,$dir,$fjson,$temp,$shrink){
+                            $p_js = [];
+                            // is_dir($cdir) || mkdir($cdir,0755,true);
+                            is_dir($dir) || mkdir($dir,0755,true);
+                            foreach ($arrs as $scr) {
+                                $putloc = $scr;
+                                if(!preg_match('/(http(s)?:)?\/\//',$scr)){
+                                    file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
+                                    $putscr = file_get_contents("$cdir/$scr");
+                                    if(preg_match('/\/js/is',$dir)){
+                                        $putloc = "$dir/".md5($scr).".js";
+                                        if($shrink)
+                                            $putscr = \__fn::minify('js',$putscr);
+                                    }else{
+                                        $putloc = "$dir/$scr";
+                                        if($shrink)
+                                            $putscr = \__fn::minify('css',$putscr);
+                                    }
+                                    
+                                    file_put_contents($putloc,$putscr);
+                                }
+                                $p_js[] = $putloc;
+                            }
+
+                            if($p_js){                                
+                                $tmjson = "$temp/$fjson";
+                                file_exists($tmjson) || file_put_contents($tmjson,"{}");
+                                $json = json_decode(file_get_contents($tmjson),true);
+                                unset($json[$node_path]);
+                                $arrs = json_encode(array_merge($json,[$node_path=>$p_js]));
+                                file_put_contents($tmjson,$arrs);
+                            }else{
+                                $arrs = "[]";
+                            }
+                            return $arrs;
+                        }
+                    }
                     // get callback function and object property from $mime value
                     $prop = (object)[];
                     $prop->css ='[]';
@@ -474,55 +529,13 @@ JS;
                         $node_path = substr($this->f3->PATH,1);
                         $node_path = $node_path ? $node_path : "index";
                         // generating css and json
-                        if(is_array($prop->css)){
-                            $pcss = [];
-                            $cdir = "app/templates/styles";
-                            // is_dir($cdir) || mkdir($cdir,0755,true);
-                            foreach ($prop->css as $scr) {
-                                $putloc = $scr;
-                                if(!preg_match('/(http(s)?:)?\/\//',$scr)){
-                                    file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
-                                    $putscr = file_get_contents("$cdir/$scr");
-                                    $putloc = "assets/css/$scr";
-                                    file_put_contents($putloc,$putscr);
-                                }
-                                $pcss[] = $putloc;
-                            }
-                            if($pcss){
-                                $tmjson = "{$this->f3->TEMP}/page_css.json";
-                                file_exists($tmjson) || file_put_contents($tmjson,"{}");
-                                $json = json_decode(file_get_contents($tmjson),true);
-                                unset($json[$node_path]);
-                                $prop->css = json_encode(array_merge($json,[$node_path=>$pcss]));
-                                file_put_contents($tmjson,$prop->css);
-                            }
-                        }
+                        if(is_array($prop->css))
+                            $prop->css = __add_pwa_pgscript($node_path,$prop->css,"app/templates/styles","assets/css","page_css.json",$this->f3->TEMP,$this->f3->DEV['minified']);
+                        
                         // generating js and json
-                        if(is_array($prop->js)){
-                            $p_js = [];
-                            $cdir = "app/templates/scripts";
-                            // is_dir($cdir) || mkdir($cdir,0755,true);
-                            is_dir("assets/js/node") || mkdir("assets/js/node",0755,true);
-                            foreach ($prop->js as $scr) {
-                                $putloc = $scr;
-                                if(!preg_match('/(http(s)?:)?\/\//',$scr)){
-                                    file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
-                                    $putscr = file_get_contents("$cdir/$scr");
-                                    $putloc = "assets/js/node/".md5($scr).".js";
-                                    file_put_contents($putloc,$putscr);
-                                }
-                                $p_js[] = $putloc;
-                            }
-
-                            if($p_js){                                
-                                $tmjson = "{$this->f3->TEMP}/page_js.json";
-                                file_exists($tmjson) || file_put_contents($tmjson,"{}");
-                                $json = json_decode(file_get_contents($tmjson),true);
-                                unset($json[$node_path]);
-                                $prop->js = json_encode(array_merge($json,[$node_path=>$p_js]));
-                                file_put_contents($tmjson,$prop->js);
-                            }
-                        }
+                        if(is_array($prop->js))
+                            $prop->js = __add_pwa_pgscript($node_path,$prop->js,"app/templates/scripts","assets/js/node","page_js.json",$this->f3->TEMP,$this->f3->DEV['minified']);
+                        
                     }
                     
                     $spa_script = sprintf($this->pwa_script,$prop->css,$prop->js); 

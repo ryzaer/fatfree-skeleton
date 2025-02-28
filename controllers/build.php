@@ -370,6 +370,11 @@ HTML;
             $this->f3->set('text',function($file,$mime=null){
                 return \Template::instance()->render($file,$mime);
             }); 
+            $this->f3->set('put_contents',function($filePath, $contents, $flags = 0) {
+                if (! is_dir($dir = implode('/', explode('/', $filePath, -1))))
+                    mkdir($dir, 0777, true);
+                file_put_contents($filePath, $contents, $flags);
+            });
             $this->f3->set('view',function($file,$mime=null) {
                 $file = "app/templates/$file";
                 $call = is_callable($mime) ? $mime : null; 
@@ -483,40 +488,45 @@ JS;
  * @return string JSON encoded array of paths to the processed files.
  */
 
-                        function __add_pwa_pgscript($node_path,$arrs,$cdir,$dir,$fjson,$temp,$shrink){
-                            $p_js = [];
-                            // is_dir($cdir) || mkdir($cdir,0755,true);
-                            is_dir($dir) || mkdir($dir,0755,true);
-                            foreach ($arrs as $scr) {
-                                $putloc = $scr;
-                                if(!preg_match('/(http(s)?:)?\/\//',$scr)){
-                                    file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
-                                    $putscr = file_get_contents("$cdir/$scr");
-                                    if(preg_match('/\/js/is',$dir)){
-                                        $putloc = "$dir/".md5($scr).".js";
-                                        if($shrink)
-                                            $putscr = \__fn::minify('js',$putscr);
-                                    }else{
-                                        $putloc = "$dir/$scr";
-                                        if($shrink)
-                                            $putscr = \__fn::minify('css',$putscr);
+                        function __add_pwa_pgscript($node_path,$arrs,$cdir,$dir,$fjson){
+                            if($f3 = \Base::instance()){
+                                $p_js = [];
+                                $cdir = "$cdir/$node_path";
+                                is_dir($cdir) || mkdir($cdir,0755,true);
+                                is_dir($dir) || mkdir($dir,0755,true);
+                                foreach ($arrs as $scr) {
+                                    $putloc = $scr;
+                                    if(!preg_match('/(http(s)?:)?\/\//',$scr)){
+                                        file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
+                                        $putscr = file_get_contents("$cdir/$scr");
+                                        if(preg_match('/\/js/is',$dir)){
+                                            $putloc = "$dir/".md5($scr).".js";
+                                            if($f3->DEV['minified'])
+                                                $putscr = \__fn::minify('js',$putscr);
+                                        }else{
+                                            $putloc = "$dir/$scr";
+                                            if($f3->DEV['minified'])
+                                                $putscr = \__fn::minify('css',$putscr);
+                                        }
+                                        
+                                        file_put_contents($putloc,$putscr);
                                     }
-                                    
-                                    file_put_contents($putloc,$putscr);
+                                    $p_js[] = $putloc;
                                 }
-                                $p_js[] = $putloc;
-                            }
-
-                            if($p_js){                                
-                                $tmjson = "$temp/$fjson";
-                                file_exists($tmjson) || file_put_contents($tmjson,"{}");
-                                $json = json_decode(file_get_contents($tmjson),true);
-                                unset($json[$node_path]);
-                                $arrs = json_encode(array_merge($json,[$node_path=>$p_js]));
-                                file_put_contents($tmjson,$arrs);
+                                if($p_js){                                
+                                    $tmjson = "{$f3->TEMP}/$fjson";
+                                    file_exists($tmjson) || file_put_contents($tmjson,"{}");
+                                    $json = json_decode(file_get_contents($tmjson),true);
+                                    unset($json[$node_path]);
+                                    $arrs = json_encode(array_merge($json,[$node_path=>$p_js]));
+                                    file_put_contents($tmjson,$arrs);
+                                }else{
+                                    $arrs = "[]";
+                                }
                             }else{
                                 $arrs = "[]";
                             }
+
                             return $arrs;
                         }
                     }
@@ -530,11 +540,11 @@ JS;
                         $node_path = $node_path[0] ? $node_path[0] : "index";
                         // generating css and json
                         if(is_array($prop->css))
-                            $prop->css = __add_pwa_pgscript($node_path,$prop->css,"app/templates/styles","assets/css","page_css.json",$this->f3->TEMP,$this->f3->DEV['minified']);
+                            $prop->css = __add_pwa_pgscript($node_path,$prop->css,"app/templates/styles","assets/css","page_css.json");
                         
                         // generating js and json
                         if(is_array($prop->js))
-                            $prop->js = __add_pwa_pgscript($node_path,$prop->js,"app/templates/scripts","assets/js/node","page_js.json",$this->f3->TEMP,$this->f3->DEV['minified']);
+                            $prop->js = __add_pwa_pgscript($node_path,$prop->js,"app/templates/scripts","assets/js/node","page_js.json");
                         
                     }
                     
@@ -556,6 +566,7 @@ JS;
 
                 }
             });
+            
             $this->f3->set('script',function($ext,$filename=[]){
                 $src = [
                     "js" => "scripts",

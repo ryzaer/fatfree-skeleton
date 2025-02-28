@@ -497,10 +497,11 @@ JS;
                                 foreach ($arrs as $scr) {
                                     $putloc = $scr;
                                     if(!preg_match('/(http(s)?:)?\/\//',$scr)){
-                                        file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $scr */");
+                                        file_exists("$cdir/$scr") || file_put_contents("$cdir/$scr","/* $node_path ~ $scr */");
                                         $putscr = file_get_contents("$cdir/$scr");
                                         if(preg_match('/\/js/is',$dir)){
-                                            $putloc = "$dir/".md5($scr).".js";
+                                            // add node path as unique script id
+                                            $putloc = "$dir/".md5("$node_path/$scr").".js";
                                             if($f3->DEV['minified'])
                                                 $putscr = \__fn::minify('js',$putscr);
                                         }else{
@@ -526,7 +527,6 @@ JS;
                             }else{
                                 $arrs = "[]";
                             }
-
                             return $arrs;
                         }
                     }
